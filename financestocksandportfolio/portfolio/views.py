@@ -110,8 +110,20 @@ class StockDetailAPIView(APIView):
         except Stock.DoesNotExist:
             return Response({"error": "Stock not found"}, status=404)
 
-        serializer = StockSerializer(stock)
-        return Response(serializer.data)
+        # 🔥 check if range query param exists
+        range_value = request.query_params.get("range")
+
+        # If NO range → return normal serializer (old behavior)
+        if not range_value:
+            serializer = StockSerializer(stock)
+            return Response(serializer.data)
+
+        # If range exists → return live data + history
+        try:
+            stock_data = fetch_stock_data(stock.ticker, range_value)
+            return Response(stock_data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
 
     def put(self, request, pk):
         try:

@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 function StockTable({ stocks = [], onRemove }) {
+
+  const navigate = useNavigate(); // ✅ INSIDE component
 
   if (!stocks.length) {
     return <p style={{ marginTop: "20px" }}>No stocks added yet.</p>;
@@ -13,6 +17,7 @@ function StockTable({ stocks = [], onRemove }) {
   return (
     <div className="table-wrapper">
       <table className="stock-table">
+
         <thead>
           <tr>
             <th>Name</th>
@@ -24,7 +29,7 @@ function StockTable({ stocks = [], onRemove }) {
             <th>Intrinsic</th>
             <th>Discount %</th>
             <th>Opportunity</th>
-            <th>Action</th> {/* 🔥 NEW COLUMN */}
+            <th>Action</th>
           </tr>
         </thead>
 
@@ -34,7 +39,11 @@ function StockTable({ stocks = [], onRemove }) {
             const percentage = (score / 10) * 100;
 
             return (
-              <tr key={stock.id}>
+              <tr
+                key={stock.id}
+                onClick={() => navigate(`/stock/${stock.id}`)} // ✅ Row click
+                style={{ cursor: "pointer" }}
+              >
                 <td>{stock.name}</td>
                 <td>{stock.ticker}</td>
                 <td>₹{stock.current_price}</td>
@@ -66,11 +75,13 @@ function StockTable({ stocks = [], onRemove }) {
                   </div>
                 </td>
 
-                {/* 🔥 REMOVE BUTTON */}
                 <td>
                   <button
                     className="remove-btn"
-                    onClick={() => onRemove(stock.id)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // ✅ Prevent row click
+                      onRemove(stock.id);
+                    }}
                   >
                     Remove
                   </button>
@@ -80,6 +91,7 @@ function StockTable({ stocks = [], onRemove }) {
             );
           })}
         </tbody>
+
       </table>
     </div>
   );
