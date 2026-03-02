@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PriceChart from "../components/PriceChart";
+import API from "../services/api";
 
 function StockDetail() {
   const { id } = useParams();
@@ -10,15 +11,19 @@ function StockDetail() {
 
   useEffect(() => {
     fetchStockDetails();
-  }, [range]);
+  }, [range, id]);
 
   const fetchStockDetails = async () => {
-  const res = await fetch(
-  `http://localhost:8000/api/stocks/${id}?range=${range}`
-   );
-    const data = await res.json();
-    setStock(data.stock);
-    setHistory(data.history);
+    try {
+      const res = await API.get(`stocks/${id}/`, {
+        params: { range }
+      });
+      const data = res.data;
+      setStock(data.stock);
+      setHistory(data.history || []);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   if (!stock) return <p>Loading...</p>;

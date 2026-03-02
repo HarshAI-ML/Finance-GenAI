@@ -27,6 +27,9 @@ body {
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .logo {
@@ -35,6 +38,40 @@ body {
   font-size: 22px;
   font-weight: 600;
   letter-spacing: 0.5px;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-user {
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.navbar-link {
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.navbar-link:hover {
+  color: #ffffff;
+}
+
+.navbar-btn {
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.navbar-btn:hover {
+  background: #334155;
 }
 
 /* =========================
@@ -67,6 +104,101 @@ body {
   align-items: flex-start;
   gap: 15px;
   margin-bottom: 40px;
+}
+
+.auth-container {
+  max-width: 460px;
+  margin: 80px auto;
+  padding: 0 16px;
+}
+
+.auth-form {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-form h2 {
+  margin-bottom: 4px;
+  font-size: 28px;
+  color: #0f172a;
+}
+
+.auth-header {
+  margin-bottom: 4px;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.auth-form input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+}
+
+.auth-btn {
+  margin-top: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.auth-btn-primary {
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.auth-btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.auth-btn-secondary {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.auth-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.auth-copy {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.auth-divider {
+  margin-top: 4px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.auth-alt-text {
+  font-size: 13px;
+  color: #475569;
+  text-align: center;
 }
 
 .portfolio-form input {

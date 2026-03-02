@@ -1,5 +1,9 @@
 from django.urls import path
 from .views import (
+    SignupAPIView,
+    LoginAPIView,
+    LogoutAPIView,
+    MeAPIView,
     PortfolioListAPIView,
     PortfolioDetailAPIView,
     StockListAPIView,
@@ -9,6 +13,11 @@ from .views import (
 )
 
 urlpatterns = [
+    # Auth APIs
+    path("auth/signup/", SignupAPIView.as_view(), name="signup"),
+    path("auth/login/", LoginAPIView.as_view(), name="login"),
+    path("auth/logout/", LogoutAPIView.as_view(), name="logout"),
+    path("auth/me/", MeAPIView.as_view(), name="me"),
 
     # Portfolio APIs
     path('portfolios/', PortfolioListAPIView.as_view(), name='portfolio-list'),

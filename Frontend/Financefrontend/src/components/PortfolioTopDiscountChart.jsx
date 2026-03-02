@@ -9,14 +9,15 @@ import {
   CartesianGrid,
   Cell
 } from "recharts";
+import API from "../services/api";
 
 function PortfolioTopDiscountChart({ portfolioId, refreshToken }) {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/portfolios/${portfolioId}/top-discount/`)
-      .then(res => res.json())
-      .then(data => setData(data));
+    API.get(`portfolios/${portfolioId}/top-discount/`)
+      .then((res) => setData(res.data || []))
+      .catch(() => setData([]));
   }, [portfolioId, refreshToken]);
 
   if (!data.length) return null;

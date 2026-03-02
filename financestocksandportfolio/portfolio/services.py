@@ -123,3 +123,35 @@ def search_stocks(query, max_results=8):
         seen_symbols.add(symbol)
 
     return suggestions
+
+
+def refresh_stock_snapshot(stock):
+    stock_data = fetch_stock_data(stock.ticker)
+    stock.current_price = stock_data.get("current_price")
+    stock.pe_ratio = stock_data.get("pe_ratio")
+    stock.eps = stock_data.get("eps")
+    stock.market_cap = stock_data.get("market_cap")
+    stock.intrinsic_value = stock_data.get("intrinsic_value")
+    stock.discount_level = stock_data.get("discount_level")
+    stock.opportunity_score = stock_data.get("opportunity_score")
+    stock.save(
+        update_fields=[
+            "current_price",
+            "pe_ratio",
+            "eps",
+            "market_cap",
+            "intrinsic_value",
+            "discount_level",
+            "opportunity_score",
+            "last_updated",
+        ]
+    )
+    return stock
+
+
+def refresh_portfolio_stocks(portfolio):
+    for stock in portfolio.stocks.all():
+        try:
+            refresh_stock_snapshot(stock)
+        except Exception:
+            continue

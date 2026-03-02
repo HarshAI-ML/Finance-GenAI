@@ -1,9 +1,72 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from .models import Portfolio, Stock
 from .serializers import PortfolioSerializer, StockSerializer
-from .services import fetch_stock_data, search_stocks
+from .services import (
+    fetch_stock_data,
+    search_stocks,
+    refresh_portfolio_stocks,
+)
+
+
+class SignupAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = (request.data.get("username") or "").strip()
+        password = request.data.get("password") or ""
+
+        if not username or not password:
+            return Response(
+                {"error": "Username and password are required"},
+                status=400,
+            )
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Username already exists"}, status=400)
+
+        user = User.objects.create_user(username=username, password=password)
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response(
+            {"token": token.key, "user": {"id": user.id, "username": user.username}},
+            status=201,
+        )
+
+
+class LoginAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = (request.data.get("username") or "").strip()
+        password = request.data.get("password") or ""
+
+        user = authenticate(request, username=username, password=password)
+        if not user:
+            return Response({"error": "Invalid credentials"}, status=400)
+
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response(
+            {"token": token.key, "user": {"id": user.id, "username": user.username}}
+        )
+
+
+class LogoutAPIView(APIView):
+
+    def post(self, request):
+        Token.objects.filter(user=request.user).delete()
+        return Response({"message": "Logged out successfully"})
+
+
+class MeAPIView(APIView):
+
+    def get(self, request):
+        return Response({"id": request.user.id, "username": request.user.username})
 
 
 # -----------------------
@@ -13,14 +76,18 @@ from .services import fetch_stock_data, search_stocks
 class PortfolioListAPIView(APIView):
 
     def get(self, request):
-        portfolios = Portfolio.objects.all()
+        portfolios = Portfolio.objects.filter(owner=request.user)
+        for portfolio in portfolios:
+            refresh_portfolio_stocks(portfolio)
+
+        portfolios = Portfolio.objects.filter(owner=request.user)
         serializer = PortfolioSerializer(portfolios, many=True)
         return Response(serializer.data)
 
     def post(self, request):
         serializer = PortfolioSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -29,16 +96,18 @@ class PortfolioDetailAPIView(APIView):
 
     def get(self, request, pk):
         try:
-            portfolio = Portfolio.objects.get(pk=pk)
+            portfolio = Portfolio.objects.get(pk=pk, owner=request.user)
         except Portfolio.DoesNotExist:
             return Response({"error": "Portfolio not found"}, status=404)
 
+        refresh_portfolio_stocks(portfolio)
+        portfolio.refresh_from_db()
         serializer = PortfolioSerializer(portfolio)
         return Response(serializer.data)
 
     def put(self, request, pk):
         try:
-            portfolio = Portfolio.objects.get(pk=pk)
+            portfolio = Portfolio.objects.get(pk=pk, owner=request.user)
         except Portfolio.DoesNotExist:
             return Response({"error": "Portfolio not found"}, status=404)
 
@@ -50,7 +119,7 @@ class PortfolioDetailAPIView(APIView):
 
     def delete(self, request, pk):
         try:
-            portfolio = Portfolio.objects.get(pk=pk)
+            portfolio = Portfolio.objects.get(pk=pk, owner=request.user)
         except Portfolio.DoesNotExist:
             return Response({"error": "Portfolio not found"}, status=404)
 
@@ -65,7 +134,7 @@ class PortfolioDetailAPIView(APIView):
 class StockListAPIView(APIView):
 
     def get(self, request):
-        stocks = Stock.objects.all()
+        stocks = Stock.objects.filter(portfolio__owner=request.user)
         serializer = StockSerializer(stocks, many=True)
         return Response(serializer.data)
 
@@ -82,11 +151,16 @@ class StockListAPIView(APIView):
             )
 
         try:
+            portfolio = Portfolio.objects.get(pk=portfolio_id, owner=request.user)
+        except Portfolio.DoesNotExist:
+            return Response({"error": "Portfolio not found"}, status=404)
+
+        try:
             # Fetch stock data automatically
             stock_data = fetch_stock_data(ticker)
 
             stock = Stock.objects.create(
-                portfolio_id=portfolio_id,
+                portfolio=portfolio,
                 name=name,
                 ticker=ticker,
                 **stock_data
@@ -120,7 +194,7 @@ class StockDetailAPIView(APIView):
 
     def get(self, request, pk):
         try:
-            stock = Stock.objects.get(pk=pk)
+            stock = Stock.objects.get(pk=pk, portfolio__owner=request.user)
         except Stock.DoesNotExist:
             return Response({"error": "Stock not found"}, status=404)
 
@@ -141,7 +215,7 @@ class StockDetailAPIView(APIView):
 
     def put(self, request, pk):
         try:
-            stock = Stock.objects.get(pk=pk)
+            stock = Stock.objects.get(pk=pk, portfolio__owner=request.user)
         except Stock.DoesNotExist:
             return Response({"error": "Stock not found"}, status=404)
 
@@ -153,7 +227,7 @@ class StockDetailAPIView(APIView):
 
     def delete(self, request, pk):
         try:
-            stock = Stock.objects.get(pk=pk)
+            stock = Stock.objects.get(pk=pk, portfolio__owner=request.user)
         except Stock.DoesNotExist:
             return Response({"error": "Stock not found"}, status=404)
 
@@ -164,7 +238,7 @@ class PortfolioTopDiscountAPIView(APIView):
 
     def get(self, request, pk):
         try:
-            portfolio = Portfolio.objects.get(pk=pk)
+            portfolio = Portfolio.objects.get(pk=pk, owner=request.user)
         except Portfolio.DoesNotExist:
             return Response({"error": "Portfolio not found"}, status=404)
 
