@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Portfolio, Stock
 from .serializers import PortfolioSerializer, StockSerializer
-from .services import fetch_stock_data
+from .services import fetch_stock_data, search_stocks
 
 
 # -----------------------
@@ -100,7 +100,21 @@ class StockListAPIView(APIView):
                 {"error": str(e)},
                 status=400
             )
-        
+
+
+class StockSearchAPIView(APIView):
+
+    def get(self, request):
+        query = request.query_params.get("q", "")
+        if not query.strip():
+            return Response({"results": []})
+
+        try:
+            results = search_stocks(query)
+            return Response({"results": results})
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
 
 class StockDetailAPIView(APIView):
 

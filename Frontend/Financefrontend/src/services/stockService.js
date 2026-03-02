@@ -14,6 +14,12 @@ export const createStock = (data) => {
   return API.post("stocks/", data);
 };
 
+export const searchStocks = (query) => {
+  return API.get("stocks/search/", {
+    params: { q: query }
+  });
+};
+
 export const updateStock = (id, data) => {
   return API.put(`stocks/${id}/`, data);
 };

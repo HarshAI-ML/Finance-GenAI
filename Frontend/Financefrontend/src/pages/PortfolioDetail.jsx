@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getPortfolioById } from "../services/portfolioService";
-import { createStock } from "../services/stockService";
+import { createStock, deleteStock, searchStocks } from "../services/stockService";
 import StockTable from "../components/StockTable";
-import { deleteStock } from "../services/stockService";
 import PortfolioTopDiscountChart from "../components/PortfolioTopDiscountChart";
 import ProfileSummaryCards from "../components/ProfileSummaryCards";
 
@@ -13,15 +12,43 @@ function PortfolioDetail() {
   const [portfolio, setPortfolio] = useState(null);
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     ticker: ""
   });
+  const chartRefreshToken = stocks.map((stock) => stock.id).join(",");
 
   useEffect(() => {
     fetchPortfolio();
   }, [id]);
+
+  useEffect(() => {
+    const query = formData.name.trim();
+
+    if (query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        const res = await searchStocks(query);
+        setSuggestions(res.data?.results || []);
+      } catch (error) {
+        console.error(error);
+        setSuggestions([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [formData.name]);
 
   const fetchPortfolio = async () => {
     try {
@@ -45,7 +72,10 @@ function PortfolioDetail() {
   const handleAddStock = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.ticker) return;
+    if (!formData.name || !formData.ticker) {
+      alert("Please select a stock from the suggestions.");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -62,12 +92,29 @@ function PortfolioDetail() {
         name: "",
         ticker: ""
       });
+      setSuggestions([]);
 
     } catch (error) {
       alert(error.response?.data?.error || "Error adding stock");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleStockInputChange = (value) => {
+    setFormData({
+      name: value,
+      ticker: ""
+    });
+  };
+
+  const handleSuggestionSelect = (suggestion) => {
+    setFormData({
+      name: suggestion.name,
+      ticker: suggestion.ticker
+    });
+    setSuggestions([]);
+    setIsInputFocused(false);
   };
 
   if (!portfolio) {
@@ -83,25 +130,43 @@ function PortfolioDetail() {
 
       <form onSubmit={handleAddStock} className="portfolio-form">
 
-        <input
-          type="text"
-          placeholder="Stock Name"
-          value={formData.name}
-          onChange={(e) =>
-            setFormData({ ...formData, name: e.target.value })
-          }
-          required
-        />
+        <div className="stock-search-wrapper">
+          <input
+            type="text"
+            placeholder="Search Stock Name (e.g. Tata Motors)"
+            value={formData.name}
+            onChange={(e) => handleStockInputChange(e.target.value)}
+            onFocus={() => setIsInputFocused(true)}
+            onBlur={() => setIsInputFocused(false)}
+            autoComplete="off"
+            required
+          />
 
-        <input
-          type="text"
-          placeholder="Ticker (e.g. TATAMOTORS.NS)"
-          value={formData.ticker}
-          onChange={(e) =>
-            setFormData({ ...formData, ticker: e.target.value })
-          }
-          required
-        />
+          {isSearching && (
+            <p className="stock-search-meta">Searching...</p>
+          )}
+
+          {isInputFocused && suggestions.length > 0 && (
+            <ul className="stock-suggestions">
+              {suggestions.map((item) => (
+                <li
+                  key={item.ticker}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => handleSuggestionSelect(item)}
+                >
+                  <span>{item.name}</span>
+                  <span>{item.ticker}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {formData.ticker && (
+            <p className="stock-selected-hint">
+              Selected ticker: <strong>{formData.ticker}</strong>
+            </p>
+          )}
+        </div>
 
         <button type="submit" disabled={loading}>
           {loading ? "Fetching..." : "Fetch & Add"}
@@ -114,7 +179,7 @@ function PortfolioDetail() {
       <h3 style={{ marginTop: "40px" }}>Stocks</h3>
       {/* <StockTable stocks={stocks} /> */}
       <StockTable stocks={stocks} onRemove={handleRemoveStock} />
-      <PortfolioTopDiscountChart portfolioId={id} />
+      <PortfolioTopDiscountChart portfolioId={id} refreshToken={chartRefreshToken} />
     </div>
   );
 }

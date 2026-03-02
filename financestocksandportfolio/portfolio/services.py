@@ -82,3 +82,44 @@ def fetch_stock_data(ticker, range_value=None):
         },
         "history": history
     }
+
+
+def search_stocks(query, max_results=8):
+    cleaned_query = (query or "").strip()
+    if not cleaned_query:
+        return []
+
+    try:
+        search = yf.Search(query=cleaned_query, max_results=max_results)
+        quotes = search.quotes or []
+    except Exception:
+        return []
+
+    suggestions = []
+    seen_symbols = set()
+
+    for quote in quotes:
+        symbol = quote.get("symbol")
+        if not symbol or symbol in seen_symbols:
+            continue
+
+        quote_type = quote.get("quoteType")
+        if quote_type and quote_type != "EQUITY":
+            continue
+
+        name = (
+            quote.get("shortname")
+            or quote.get("longname")
+            or quote.get("displayName")
+            or symbol
+        )
+        exchange = quote.get("exchDisp") or quote.get("exchangeDisp") or ""
+
+        suggestions.append({
+            "name": name,
+            "ticker": symbol,
+            "exchange": exchange,
+        })
+        seen_symbols.add(symbol)
+
+    return suggestions

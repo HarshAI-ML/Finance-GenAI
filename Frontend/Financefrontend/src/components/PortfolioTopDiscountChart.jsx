@@ -10,14 +10,14 @@ import {
   Cell
 } from "recharts";
 
-function PortfolioTopDiscountChart({ portfolioId }) {
+function PortfolioTopDiscountChart({ portfolioId, refreshToken }) {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     fetch(`http://localhost:8000/api/portfolios/${portfolioId}/top-discount/`)
       .then(res => res.json())
       .then(data => setData(data));
-  }, [portfolioId]);
+  }, [portfolioId, refreshToken]);
 
   if (!data.length) return null;
 
