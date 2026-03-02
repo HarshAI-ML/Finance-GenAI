@@ -4,6 +4,8 @@ import { getPortfolioById } from "../services/portfolioService";
 import { createStock } from "../services/stockService";
 import StockTable from "../components/StockTable";
 import { deleteStock } from "../services/stockService";
+import PortfolioTopDiscountChart from "../components/PortfolioTopDiscountChart";
+import ProfileSummaryCards from "../components/ProfileSummaryCards";
 
 function PortfolioDetail() {
   const { id } = useParams();
@@ -107,9 +109,12 @@ function PortfolioDetail() {
 
       </form>
 
+      <ProfileSummaryCards portfolioName={portfolio.name} stocks={stocks} />
+
       <h3 style={{ marginTop: "40px" }}>Stocks</h3>
       {/* <StockTable stocks={stocks} /> */}
       <StockTable stocks={stocks} onRemove={handleRemoveStock} />
+      <PortfolioTopDiscountChart portfolioId={id} />
     </div>
   );
 }

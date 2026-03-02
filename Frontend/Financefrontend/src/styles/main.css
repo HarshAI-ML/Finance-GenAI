@@ -273,3 +273,136 @@ body {
   font-size: 18px;
   font-weight: 600;
 }
+
+/* =========================
+   PROFILE SUMMARY CARDS
+========================= */
+.profile-summary-cards {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.profile-summary-card {
+  background: linear-gradient(145deg, #ffffff, #f8fbff);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.profile-summary-label {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+
+.profile-summary-card h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.profile-summary-meta {
+  margin-top: 8px;
+  color: #475569;
+  font-size: 13px;
+}
+
+/* =========================
+   DISCOUNT CHART
+========================= */
+.discount-chart-container {
+  margin-top: 36px;
+  padding: 22px 22px 16px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.08);
+}
+
+.discount-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.chart-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #0f172a;
+}
+
+.discount-chart-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.discount-chart-badge {
+  background: #ecfdf3;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.discount-chart-area {
+  width: 100%;
+}
+
+.discount-tooltip {
+  background: #0f172a;
+  color: #f8fafc;
+  border-radius: 10px;
+  padding: 8px 11px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.4);
+}
+
+.discount-tooltip-ticker {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.discount-tooltip-value {
+  margin: 0;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .discount-chart-container {
+    padding: 18px 14px 12px;
+  }
+
+  .discount-chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chart-title {
+    font-size: 18px;
+  }
+
+  .discount-chart-subtitle {
+    font-size: 12px;
+  }
+}

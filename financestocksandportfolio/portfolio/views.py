@@ -145,3 +145,28 @@ class StockDetailAPIView(APIView):
 
         stock.delete()
         return Response(status=204)
+
+class PortfolioTopDiscountAPIView(APIView):
+
+    def get(self, request, pk):
+        try:
+            portfolio = Portfolio.objects.get(pk=pk)
+        except Portfolio.DoesNotExist:
+            return Response({"error": "Portfolio not found"}, status=404)
+
+        stocks = (
+            Stock.objects
+            .filter(portfolio=portfolio)
+            .order_by('-discount_level')[:5]
+        )
+
+        data = [
+            {
+                "name": stock.name,
+                "ticker": stock.ticker,
+                "discount_level": stock.discount_level
+            }
+            for stock in stocks
+        ]
+
+        return Response(data)
