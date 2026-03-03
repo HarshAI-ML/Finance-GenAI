@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getPortfolioById } from "../services/portfolioService";
+import { useNavigate, useParams } from "react-router-dom";
+import { deletePortfolio, getPortfolioById } from "../services/portfolioService";
 import { createStock, deleteStock, searchStocks } from "../services/stockService";
 import StockTable from "../components/StockTable";
 import PortfolioTopDiscountChart from "../components/PortfolioTopDiscountChart";
@@ -8,6 +8,7 @@ import ProfileSummaryCards from "../components/ProfileSummaryCards";
 
 function PortfolioDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [portfolio, setPortfolio] = useState(null);
   const [stocks, setStocks] = useState([]);
@@ -61,13 +62,28 @@ function PortfolioDetail() {
   };
 
   const handleRemoveStock = async (stockId) => {
-  try {
-    await deleteStock(stockId); // API call
-    setStocks((prev) => prev.filter((s) => s.id !== stockId));
-  } catch (error) {
-    console.error(error);
-  }
-};
+    try {
+      await deleteStock(stockId);
+      setStocks((prev) => prev.filter((s) => s.id !== stockId));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeletePortfolio = async () => {
+    const confirmed = window.confirm(
+      `Delete portfolio "${portfolio?.name}"? This will remove all stocks in it.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await deletePortfolio(id);
+      navigate("/dashboard");
+    } catch (error) {
+      alert(error.response?.data?.error || "Failed to delete portfolio");
+      console.error(error);
+    }
+  };
 
   const handleAddStock = async (e) => {
     e.preventDefault();
@@ -123,7 +139,16 @@ function PortfolioDetail() {
 
   return (
     <div className="container">
-      <h2>{portfolio.name}</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "center" }}>
+        <h2>{portfolio.name}</h2>
+        <button
+          type="button"
+          className="remove-btn"
+          onClick={handleDeletePortfolio}
+        >
+          Delete Portfolio
+        </button>
+      </div>
       <p><strong>Sector:</strong> {portfolio.sector}</p>
 
       <h3 style={{ marginTop: "30px" }}>Add Stock</h3>
