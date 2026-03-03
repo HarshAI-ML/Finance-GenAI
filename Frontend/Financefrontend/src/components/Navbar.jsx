@@ -16,12 +16,14 @@ function Navbar() {
     <div className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="logo">
-          Stock Portfolio
+          OnePercent365
         </Link>
 
         <div className="navbar-actions">
           {loggedIn ? (
             <>
+              <Link className="navbar-link" to="/metals">Explore Metals</Link>
+              <Link className="navbar-link" to="/dashboard">Dashboard</Link>
               <span className="navbar-user">{user?.username}</span>
               <button className="navbar-btn" onClick={handleLogout}>
                 Logout

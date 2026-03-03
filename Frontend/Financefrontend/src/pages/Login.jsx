@@ -12,7 +12,7 @@ function Login() {
     try {
       setLoading(true);
       await login(formData);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       alert(error.response?.data?.error || "Login failed");
     } finally {

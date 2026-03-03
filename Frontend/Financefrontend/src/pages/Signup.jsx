@@ -12,7 +12,7 @@ function Signup() {
     try {
       setLoading(true);
       await signup(formData);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       alert(error.response?.data?.error || "Signup failed");
     } finally {

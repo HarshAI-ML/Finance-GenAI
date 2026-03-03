@@ -5,11 +5,11 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Inter", sans-serif;
+  font-family: "Manrope", "Segoe UI", sans-serif;
 }
 
 body {
-  background: #f4f7fb;
+  background: #eef4f1;
   color: #0f172a;
   line-height: 1.6;
 }
@@ -19,7 +19,7 @@ body {
 ========================= */
 .navbar {
   width: 100%;
-  background: linear-gradient(90deg, #0f172a, #1e293b);
+  background: linear-gradient(90deg, #0d261e, #17352b);
   padding: 18px 0;
 }
 
@@ -34,9 +34,9 @@ body {
 
 .logo {
   text-decoration: none;
-  color: #a855f7;
+  color: #85f0b7;
   font-size: 22px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.5px;
 }
 
@@ -72,6 +72,335 @@ body {
 
 .navbar-btn:hover {
   background: #334155;
+}
+
+/* =========================
+   LANDING PAGE
+========================= */
+.landing {
+  min-height: calc(100vh - 74px);
+  padding: 48px 20px 64px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(88, 223, 155, 0.25), transparent 38%),
+    radial-gradient(circle at 95% 15%, rgba(61, 163, 255, 0.18), transparent 40%),
+    linear-gradient(180deg, #f5f9f7 0%, #e9f3ef 100%);
+}
+
+.landing-hero {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 42px;
+  border-radius: 26px;
+  border: 1px solid #d5e8de;
+  background: linear-gradient(140deg, #ffffff 0%, #f0f8f4 100%);
+  box-shadow: 0 24px 44px rgba(13, 38, 30, 0.1);
+}
+
+.landing-chip {
+  display: inline-block;
+  background: #ddf7e8;
+  color: #16653f;
+  border: 1px solid #b4ebcb;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.landing-hero h1 {
+  margin-top: 14px;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #0a281d;
+}
+
+.landing-hero h1 span {
+  color: #0a8e57;
+}
+
+.landing-subtitle {
+  margin-top: 14px;
+  max-width: 720px;
+  font-size: 1.05rem;
+  color: #355649;
+}
+
+.landing-cta {
+  display: flex;
+  gap: 12px;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+
+.landing-btn {
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.landing-btn-primary {
+  color: #ffffff;
+  background: linear-gradient(90deg, #118a56, #0b6e44);
+}
+
+.landing-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(15, 120, 75, 0.3);
+}
+
+.landing-btn-secondary {
+  color: #145f3c;
+  border: 1px solid #9bd9ba;
+  background: #e7f7ee;
+}
+
+.landing-btn-secondary:hover {
+  background: #d8f2e4;
+}
+
+.landing-stats {
+  max-width: 1060px;
+  margin: 18px auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.landing-stat-card {
+  background: #ffffff;
+  border: 1px solid #dcebe3;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.landing-stat-card p {
+  font-size: 13px;
+  color: #517163;
+}
+
+.landing-stat-card h3 {
+  font-size: 26px;
+  color: #0e2e22;
+  margin: 2px 0 4px;
+}
+
+.landing-stat-card span {
+  color: #5f7c6f;
+  font-size: 14px;
+}
+
+/* =========================
+   METALS PAGE
+========================= */
+.metals-page {
+  min-height: calc(100vh - 74px);
+  padding: 28px 18px 56px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(233, 210, 137, 0.25), transparent 30%),
+    radial-gradient(circle at 100% 12%, rgba(141, 162, 210, 0.23), transparent 35%),
+    linear-gradient(180deg, #f8fbfa 0%, #ecf4f2 100%);
+}
+
+.metals-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.metals-header {
+  background: #ffffff;
+  border: 1px solid #d9e9e1;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 14px 28px rgba(16, 36, 28, 0.08);
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.metals-header h1 {
+  font-size: clamp(1.8rem, 3.6vw, 2.5rem);
+  line-height: 1.1;
+  color: #0f2b20;
+}
+
+.metals-header p {
+  margin-top: 8px;
+  color: #476356;
+  max-width: 700px;
+}
+
+.metals-chip {
+  display: inline-block;
+  border-radius: 999px;
+  border: 1px solid #e6c97b;
+  background: #fff4d9;
+  color: #7e5c10;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+}
+
+.range-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 280px;
+  justify-content: flex-end;
+}
+
+.range-btn {
+  border: 1px solid #bfd7cc;
+  background: #f6fbf8;
+  color: #22463a;
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.range-btn:hover {
+  background: #eaf4ef;
+}
+
+.range-btn.active {
+  border-color: #157f54;
+  background: #1a8e5f;
+  color: #ffffff;
+}
+
+.metals-metrics {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metals-metric-card {
+  background: #ffffff;
+  border: 1px solid #d9e9e1;
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+.metals-metric-card p {
+  color: #5f7d70;
+  font-size: 13px;
+}
+
+.metals-metric-card h3 {
+  color: #112e22;
+  font-size: 29px;
+  line-height: 1.15;
+  margin: 3px 0 4px;
+}
+
+.metals-metric-card span {
+  color: #617e72;
+  font-size: 13px;
+}
+
+.metals-chart-card {
+  margin-top: 14px;
+  background: #ffffff;
+  border: 1px solid #d9e9e1;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(16, 36, 28, 0.06);
+  padding: 18px;
+}
+
+.metals-card-header h2 {
+  font-size: 21px;
+  color: #123326;
+}
+
+.metals-card-header p {
+  margin-top: 3px;
+  color: #5f7d70;
+  font-size: 13px;
+}
+
+.metals-chart-wrap {
+  margin-top: 12px;
+}
+
+.metals-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 14px;
+}
+
+.insights-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.insights-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.insight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f7fbf9;
+  border: 1px solid #dfede5;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.insight-row span {
+  color: #445f54;
+  font-size: 14px;
+}
+
+.insight-note {
+  margin-top: 14px;
+  color: #33574a;
+  font-size: 14px;
+  background: #edf7f2;
+  border: 1px solid #d2eadd;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+@media (max-width: 900px) {
+  .landing-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-hero {
+    padding: 30px 22px;
+  }
+
+  .metals-header {
+    flex-direction: column;
+  }
+
+  .range-switcher {
+    justify-content: flex-start;
+    max-width: 100%;
+  }
+
+  .metals-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metals-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* =========================

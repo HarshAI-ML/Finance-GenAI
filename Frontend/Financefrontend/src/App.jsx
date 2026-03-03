@@ -5,6 +5,8 @@ import Navbar from "./components/Navbar";
 import StockDetail from "./pages/StockDetail";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Home from "./pages/Home";
+import MetalsExplorer from "./pages/MetalsExplorer";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -12,10 +14,12 @@ function App() {
     <Router>
       <Navbar />
       <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/metals" element={<MetalsExplorer />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
