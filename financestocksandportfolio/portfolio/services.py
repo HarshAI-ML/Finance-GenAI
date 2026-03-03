@@ -20,6 +20,16 @@ def fetch_stock_data(ticker, range_value=None):
     pe_ratio = info.get("trailingPE", 0)
     eps = info.get("trailingEps", 0)
     market_cap = info.get("marketCap", 0)
+    min_price = (
+        info.get("dayLow")
+        or info.get("regularMarketDayLow")
+        or info.get("fiftyTwoWeekLow")
+    )
+    max_price = (
+        info.get("dayHigh")
+        or info.get("regularMarketDayHigh")
+        or info.get("fiftyTwoWeekHigh")
+    )
     company_name = info.get("longName") or info.get("shortName") or ticker
     intrinsic_value = eps * 20 if eps else 0
 
@@ -41,6 +51,8 @@ def fetch_stock_data(ticker, range_value=None):
     if not range_value:
         return {
             "current_price": current_price,
+            "min_price": min_price,
+            "max_price": max_price,
             "pe_ratio": pe_ratio,
             "eps": eps,
             "market_cap": market_cap,
@@ -73,6 +85,8 @@ def fetch_stock_data(ticker, range_value=None):
         "stock": {
             "name": company_name,
             "current_price": current_price,
+            "min_price": min_price,
+            "max_price": max_price,
             "pe_ratio": pe_ratio,
             "eps": eps,
             "market_cap": market_cap,
@@ -128,6 +142,8 @@ def search_stocks(query, max_results=8):
 def refresh_stock_snapshot(stock):
     stock_data = fetch_stock_data(stock.ticker)
     stock.current_price = stock_data.get("current_price")
+    stock.min_price = stock_data.get("min_price")
+    stock.max_price = stock_data.get("max_price")
     stock.pe_ratio = stock_data.get("pe_ratio")
     stock.eps = stock_data.get("eps")
     stock.market_cap = stock_data.get("market_cap")
@@ -137,6 +153,8 @@ def refresh_stock_snapshot(stock):
     stock.save(
         update_fields=[
             "current_price",
+            "min_price",
+            "max_price",
             "pe_ratio",
             "eps",
             "market_cap",

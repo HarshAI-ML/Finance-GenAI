@@ -28,6 +28,8 @@ class Stock(models.Model):
     ticker = models.CharField(max_length=20)
 
     current_price = models.FloatField(null=True, blank=True)
+    min_price = models.FloatField(null=True, blank=True)
+    max_price = models.FloatField(null=True, blank=True)
     pe_ratio = models.FloatField(null=True, blank=True)
     eps = models.FloatField(null=True, blank=True)
     market_cap = models.FloatField(null=True, blank=True)

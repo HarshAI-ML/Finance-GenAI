@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 function StockTable({ stocks = [], onRemove }) {
-
-  const navigate = useNavigate(); // ✅ INSIDE component
+  const navigate = useNavigate();
 
   if (!stocks.length) {
     return <p style={{ marginTop: "20px" }}>No stocks added yet.</p>;
@@ -14,15 +13,23 @@ function StockTable({ stocks = [], onRemove }) {
     return "#dc2626";
   };
 
+  const formatPrice = (value) => {
+    if (value === null || value === undefined || value === "") return "--";
+    const numericValue = Number(value);
+    if (Number.isNaN(numericValue)) return "--";
+    return numericValue.toFixed(2);
+  };
+
   return (
     <div className="table-wrapper">
       <table className="stock-table">
-
         <thead>
           <tr>
             <th>Name</th>
             <th>Ticker</th>
             <th>Price</th>
+            <th>Min Price</th>
+            <th>Max Price</th>
             <th>PE</th>
             <th>EPS</th>
             <th>Market Cap</th>
@@ -41,16 +48,18 @@ function StockTable({ stocks = [], onRemove }) {
             return (
               <tr
                 key={stock.id}
-                onClick={() => navigate(`/stock/${stock.id}`)} // ✅ Row click
+                onClick={() => navigate(`/stock/${stock.id}`)}
                 style={{ cursor: "pointer" }}
               >
                 <td>{stock.name}</td>
                 <td>{stock.ticker}</td>
-                <td>₹{stock.current_price}</td>
+                <td>Rs. {formatPrice(stock.current_price)}</td>
+                <td>Rs. {formatPrice(stock.min_price)}</td>
+                <td>Rs. {formatPrice(stock.max_price)}</td>
                 <td>{stock.pe_ratio}</td>
                 <td>{stock.eps}</td>
                 <td>{stock.market_cap}</td>
-                <td>₹{stock.intrinsic_value}</td>
+                <td>Rs. {formatPrice(stock.intrinsic_value)}</td>
 
                 <td
                   className={
@@ -68,7 +77,7 @@ function StockTable({ stocks = [], onRemove }) {
                       className="score-bar-fill"
                       style={{
                         width: `${percentage}%`,
-                        backgroundColor: getScoreColor(score)
+                        backgroundColor: getScoreColor(score),
                       }}
                     />
                     <span className="score-label">{score}/10</span>
@@ -79,19 +88,17 @@ function StockTable({ stocks = [], onRemove }) {
                   <button
                     className="remove-btn"
                     onClick={(e) => {
-                      e.stopPropagation(); // ✅ Prevent row click
+                      e.stopPropagation();
                       onRemove(stock.id);
                     }}
                   >
                     Remove
                   </button>
                 </td>
-
               </tr>
             );
           })}
         </tbody>
-
       </table>
     </div>
   );
