@@ -329,6 +329,30 @@ body {
   font-size: 13px;
 }
 
+.correlation-badge {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.correlation-badge strong {
+  font-weight: 700;
+}
+
+.corr-very-high { background: #e6f8ee; border-color: #9edab5; color: #0b5e33; }
+.corr-high { background: #edf9f1; border-color: #b4e6c6; color: #1b6840; }
+.corr-medium { background: #f0f6ff; border-color: #bfd4ff; color: #234b9d; }
+.corr-low { background: #fff7e8; border-color: #f3d79b; color: #8f6100; }
+.corr-neutral { background: #f5f7fa; border-color: #d4dbe5; color: #475569; }
+.corr-low-neg { background: #fff2f2; border-color: #f6c5c5; color: #9f1f1f; }
+.corr-medium-neg { background: #ffe9e9; border-color: #f3b3b3; color: #8f1d1d; }
+.corr-high-neg { background: #ffdfe0; border-color: #ea8e92; color: #7d1117; }
+
 .metals-chart-wrap {
   margin-top: 12px;
 }

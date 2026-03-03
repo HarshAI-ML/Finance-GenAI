@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LineChart,
   Line,
   AreaChart,
   Area,
+  ComposedChart,
+  Scatter,
   XAxis,
   YAxis,
   Tooltip,
@@ -11,6 +13,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { getMetalsHistory } from "../services/metalsService";
 
 const RANGE_OPTIONS = [
   { label: "1 Week", value: "1w", days: 7 },
@@ -20,11 +23,6 @@ const RANGE_OPTIONS = [
   { label: "3 Years", value: "3y", days: 1095 },
 ];
 
-function seededNoise(index) {
-  const x = Math.sin(index * 12.9898) * 43758.5453;
-  return x - Math.floor(x);
-}
-
 function toPercent(value) {
   return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
 }
@@ -32,44 +30,6 @@ function toPercent(value) {
 function calcPercentChange(start, end) {
   if (!start) return 0;
   return ((end - start) / start) * 100;
-}
-
-function generateMetalsSeries(totalDays = 1095) {
-  const rows = [];
-  let gold = 1820;
-  let silver = 22.4;
-  let lastGoldChange = 0.0008;
-
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - (totalDays - 1));
-
-  for (let i = 0; i < totalDays; i += 1) {
-    const d = new Date(startDate);
-    d.setDate(startDate.getDate() + i);
-
-    const trend = 0.00012;
-    const cyclical = Math.sin(i / 38) * 0.0019;
-    const volatility = (seededNoise(i) - 0.5) * 0.009;
-
-    const goldChange = trend + cyclical + volatility * 0.55;
-    const silverChange = trend * 1.1 + cyclical * 1.35 + volatility * 0.95 + lastGoldChange * 0.28;
-
-    gold *= 1 + goldChange;
-    silver *= 1 + silverChange;
-
-    gold = Math.max(1450, gold);
-    silver = Math.max(16, silver);
-    lastGoldChange = goldChange;
-
-    rows.push({
-      isoDate: d.toISOString().slice(0, 10),
-      label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      gold: Number(gold.toFixed(2)),
-      silver: Number(silver.toFixed(2)),
-    });
-  }
-
-  return rows;
 }
 
 function buildRelativeInsightSeries(data) {
@@ -91,15 +51,123 @@ function buildRelativeInsightSeries(data) {
   });
 }
 
+function calculatePearsonCorrelation(series) {
+  const n = series.length;
+  if (!n) return 0;
+
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+  let sumY2 = 0;
+
+  for (let i = 0; i < n; i += 1) {
+    const x = series[i].gold;
+    const y = series[i].silver;
+    sumX += x;
+    sumY += y;
+    sumXY += x * y;
+    sumX2 += x * x;
+    sumY2 += y * y;
+  }
+
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  return denominator === 0 ? 0 : numerator / denominator;
+}
+
+function getCorrelationMeta(rValue) {
+  if (rValue >= 0.9) return { label: "Highly Correlated (Very Strong +)", tone: "corr-very-high" };
+  if (rValue >= 0.7) return { label: "Highly Correlated (Strong +)", tone: "corr-high" };
+  if (rValue >= 0.4) return { label: "Moderately Correlated (+)", tone: "corr-medium" };
+  if (rValue >= 0.2) return { label: "Weak Correlation (+)", tone: "corr-low" };
+  if (rValue > -0.2) return { label: "No Clear Correlation", tone: "corr-neutral" };
+  if (rValue > -0.4) return { label: "Weak Correlation (-)", tone: "corr-low-neg" };
+  if (rValue > -0.7) return { label: "Moderately Correlated (-)", tone: "corr-medium-neg" };
+  return { label: "Highly Correlated (Strong -)", tone: "corr-high-neg" };
+}
+
+function buildGoldSilverRegression(series) {
+  if (!series.length) return { points: [], line: [] };
+
+  const n = series.length;
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+  let minGold = Number.POSITIVE_INFINITY;
+  let maxGold = Number.NEGATIVE_INFINITY;
+
+  for (let i = 0; i < n; i += 1) {
+    const x = series[i].gold;
+    const y = series[i].silver;
+    sumX += x;
+    sumY += y;
+    sumXY += x * y;
+    sumX2 += x * x;
+    minGold = Math.min(minGold, x);
+    maxGold = Math.max(maxGold, x);
+  }
+
+  const denominator = n * sumX2 - sumX * sumX;
+  const slope = denominator === 0 ? 0 : (n * sumXY - sumX * sumY) / denominator;
+  const intercept = (sumY - slope * sumX) / n;
+
+  const points = series.map((row) => ({
+    gold: Number(row.gold.toFixed(2)),
+    silver: Number(row.silver.toFixed(2)),
+  }));
+
+  const line = [
+    {
+      gold: Number(minGold.toFixed(2)),
+      silverFit: Number((slope * minGold + intercept).toFixed(2)),
+    },
+    {
+      gold: Number(maxGold.toFixed(2)),
+      silverFit: Number((slope * maxGold + intercept).toFixed(2)),
+    },
+  ];
+
+  return { points, line };
+}
+
 function MetalsExplorer() {
   const [range, setRange] = useState("6m");
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const fullSeries = useMemo(() => generateMetalsSeries(1095), []);
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const response = await getMetalsHistory();
+        const rows = (response.data?.history || []).map((row) => ({
+          ...row,
+          isoDate: row.date,
+          label: new Date(row.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        }));
+        if (active) setHistory(rows);
+      } catch (err) {
+        if (active) setError(err.response?.data?.error || "Failed to load metals data");
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const selectedRangeConfig = RANGE_OPTIONS.find((item) => item.value === range) || RANGE_OPTIONS[2];
 
   const selectedSeries = useMemo(
-    () => fullSeries.slice(-selectedRangeConfig.days),
-    [fullSeries, selectedRangeConfig.days]
+    () => history.slice(-selectedRangeConfig.days),
+    [history, selectedRangeConfig.days]
   );
 
   const relativeInsightSeries = useMemo(
@@ -108,7 +176,10 @@ function MetalsExplorer() {
   );
 
   const evolution3M = useMemo(() => {
-    const slice = fullSeries.slice(-90);
+    const slice = history.slice(-90);
+    if (!slice.length) {
+      return { goldChange: 0, silverChange: 0, spread: 0 };
+    }
     const first = slice[0];
     const last = slice[slice.length - 1];
     const goldChange = calcPercentChange(first?.gold, last?.gold);
@@ -120,9 +191,17 @@ function MetalsExplorer() {
       silverChange,
       spread,
     };
-  }, [fullSeries]);
+  }, [history]);
 
   const selectedWindowChange = useMemo(() => {
+    if (!selectedSeries.length) {
+      return {
+        gold: 0,
+        silver: 0,
+        goldNow: 0,
+        silverNow: 0,
+      };
+    }
     const first = selectedSeries[0];
     const last = selectedSeries[selectedSeries.length - 1];
     return {
@@ -132,6 +211,19 @@ function MetalsExplorer() {
       silverNow: last?.silver ?? 0,
     };
   }, [selectedSeries]);
+
+  const goldSilverRegression = useMemo(
+    () => buildGoldSilverRegression(selectedSeries),
+    [selectedSeries]
+  );
+  const goldSilverCorrelation = useMemo(
+    () => calculatePearsonCorrelation(selectedSeries),
+    [selectedSeries]
+  );
+  const correlationMeta = useMemo(
+    () => getCorrelationMeta(goldSilverCorrelation),
+    [goldSilverCorrelation]
+  );
 
   return (
     <main className="metals-page">
@@ -160,7 +252,21 @@ function MetalsExplorer() {
           </div>
         </div>
 
-        <div className="metals-metrics">
+        {loading && (
+          <section className="metals-chart-card">
+            <p>Loading latest 3-year gold and silver history...</p>
+          </section>
+        )}
+
+        {error && (
+          <section className="metals-chart-card">
+            <p className="negative">{error}</p>
+          </section>
+        )}
+
+        {!loading && !error && (
+          <>
+            <div className="metals-metrics">
           <article className="metals-metric-card">
             <p>Gold Price (USD/oz)</p>
             <h3>{selectedWindowChange.goldNow.toFixed(2)}</h3>
@@ -294,6 +400,60 @@ function MetalsExplorer() {
             </p>
           </article>
         </section>
+
+        <section className="metals-chart-card">
+          <div className="metals-card-header">
+            <h2>Gold vs Silver Correlation & Best-Fit</h2>
+            <p>X-axis: Gold price, Y-axis: Silver price for {selectedRangeConfig.label}</p>
+            <div className={`correlation-badge ${correlationMeta.tone}`}>
+              <strong>Pearson r: {goldSilverCorrelation.toFixed(3)}</strong>
+              <span>{correlationMeta.label}</span>
+            </div>
+          </div>
+          <div className="metals-chart-wrap">
+            <ResponsiveContainer width="100%" height={340}>
+              <ComposedChart>
+                <CartesianGrid strokeDasharray="3 3" stroke="#d9e7df" />
+                <XAxis
+                  type="number"
+                  dataKey="gold"
+                  name="Gold Price"
+                  domain={["auto", "auto"]}
+                  stroke="#527263"
+                />
+                <YAxis
+                  type="number"
+                  dataKey="silver"
+                  name="Silver Price"
+                  domain={["auto", "auto"]}
+                  stroke="#3a5561"
+                />
+                <Tooltip
+                  formatter={(value) => Number(value).toFixed(2)}
+                  labelFormatter={() => ""}
+                />
+                <Legend />
+                <Scatter
+                  data={goldSilverRegression.points}
+                  dataKey="silver"
+                  name="Observed Points"
+                  fill="#4f73c7"
+                />
+                <Line
+                  data={goldSilverRegression.line}
+                  type="linear"
+                  dataKey="silverFit"
+                  name="Best-Fit Line"
+                  stroke="#b97700"
+                  strokeWidth={2.8}
+                  dot={false}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+          </>
+        )}
       </section>
     </main>
   );

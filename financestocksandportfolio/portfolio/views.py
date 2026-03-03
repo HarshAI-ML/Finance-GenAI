@@ -11,6 +11,7 @@ from .services import (
     fetch_stock_data,
     search_stocks,
     refresh_portfolio_stocks,
+    fetch_metals_history_3y,
 )
 
 
@@ -258,3 +259,17 @@ class PortfolioTopDiscountAPIView(APIView):
         ]
 
         return Response(data)
+
+
+class MetalsHistoryAPIView(APIView):
+
+    def get(self, request):
+        try:
+            history = fetch_metals_history_3y()
+            return Response({
+                "period": "3y",
+                "source": "yfinance",
+                "history": history,
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)

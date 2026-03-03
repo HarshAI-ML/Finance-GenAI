@@ -155,3 +155,35 @@ def refresh_portfolio_stocks(portfolio):
             refresh_stock_snapshot(stock)
         except Exception:
             continue
+
+
+def fetch_metals_history_3y():
+    gold_df = yf.Ticker("GC=F").history(period="3y", interval="1d")
+    silver_df = yf.Ticker("SI=F").history(period="3y", interval="1d")
+
+    if gold_df.empty or silver_df.empty:
+        raise Exception("Unable to fetch metals history from yfinance")
+
+    gold_prices = {
+        idx.strftime("%Y-%m-%d"): round(float(row["Close"]), 2)
+        for idx, row in gold_df.iterrows()
+        if row.get("Close") is not None
+    }
+    silver_prices = {
+        idx.strftime("%Y-%m-%d"): round(float(row["Close"]), 2)
+        for idx, row in silver_df.iterrows()
+        if row.get("Close") is not None
+    }
+
+    common_dates = sorted(set(gold_prices.keys()) & set(silver_prices.keys()))
+    if not common_dates:
+        raise Exception("No overlapping history found for gold and silver")
+
+    return [
+        {
+            "date": date,
+            "gold": gold_prices[date],
+            "silver": silver_prices[date],
+        }
+        for date in common_dates
+    ]
