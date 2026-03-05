@@ -19,3 +19,7 @@ export const updatePortfolio = (id, data) => {
 export const deletePortfolio = (id) => {
   return API.delete(`portfolios/${id}/`);
 };
+
+export const getPortfolioRiskClusters = (id) => {
+  return API.get(`portfolios/${id}/risk-clusters/`);
+};

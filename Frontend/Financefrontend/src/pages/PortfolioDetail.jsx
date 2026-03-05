@@ -4,6 +4,7 @@ import { deletePortfolio, getPortfolioById } from "../services/portfolioService"
 import { createStock, deleteStock, searchStocks } from "../services/stockService";
 import StockTable from "../components/StockTable";
 import PortfolioTopDiscountChart from "../components/PortfolioTopDiscountChart";
+import StockRiskClusterPanel from "../components/StockRiskClusterPanel";
 import ProfileSummaryCards from "../components/ProfileSummaryCards";
 
 function PortfolioDetail() {
@@ -205,6 +206,7 @@ function PortfolioDetail() {
       {/* <StockTable stocks={stocks} /> */}
       <StockTable stocks={stocks} onRemove={handleRemoveStock} />
       <PortfolioTopDiscountChart portfolioId={id} refreshToken={chartRefreshToken} />
+      <StockRiskClusterPanel portfolioId={id} refreshToken={chartRefreshToken} />
     </div>
   );
 }
