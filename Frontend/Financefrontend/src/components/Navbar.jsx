@@ -23,6 +23,7 @@ function Navbar() {
           {loggedIn ? (
             <>
               <Link className="navbar-link" to="/metals">Explore Metals</Link>
+              <Link className="navbar-link" to="/features">Other Features</Link>
               <Link className="navbar-link" to="/dashboard">Dashboard</Link>
               <span className="navbar-user">{user?.username}</span>
               <button className="navbar-btn" onClick={handleLogout}>

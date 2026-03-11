@@ -205,3 +205,61 @@ def fetch_metals_history_3y():
         }
         for date in common_dates
     ]
+
+
+def fetch_top_growth_stocks(stocks, range_value="1M", limit=8):
+    period_map = {
+        "1W": "7d",
+        "1M": "1mo",
+        "3M": "3mo",
+        "6M": "6mo",
+        "1Y": "1y",
+        "3Y": "3y",
+    }
+    selected_range = (range_value or "1M").upper()
+    period = period_map.get(selected_range, "1mo")
+
+    growth_rows = []
+    for stock in stocks:
+        tickers_to_try = [stock.ticker]
+        if "." not in stock.ticker:
+            tickers_to_try.append(f"{stock.ticker}.NS")
+
+        history_df = None
+        for ticker_symbol in tickers_to_try:
+            try:
+                fetched = yf.Ticker(ticker_symbol).history(period=period, interval="1d")
+            except Exception:
+                fetched = None
+
+            if fetched is not None and not fetched.empty and "Close" in fetched.columns:
+                history_df = fetched
+                break
+
+        if history_df is None or history_df.empty:
+            continue
+
+        close_series = history_df["Close"].dropna()
+        if close_series.empty:
+            continue
+
+        start_price = float(close_series.iloc[0])
+        end_price = float(close_series.iloc[-1])
+        if start_price == 0:
+            continue
+
+        growth_percent = ((end_price - start_price) / start_price) * 100
+
+        growth_rows.append(
+            {
+                "id": stock.id,
+                "name": stock.name,
+                "ticker": stock.ticker,
+                "start_price": round(start_price, 2),
+                "end_price": round(end_price, 2),
+                "growth_percent": round(growth_percent, 2),
+            }
+        )
+
+    sorted_rows = sorted(growth_rows, key=lambda item: item["growth_percent"], reverse=True)
+    return sorted_rows[:limit]

@@ -12,6 +12,7 @@ from .services import (
     search_stocks,
     refresh_portfolio_stocks,
     fetch_metals_history_3y,
+    fetch_top_growth_stocks,
 )
 
 
@@ -259,6 +260,30 @@ class PortfolioTopDiscountAPIView(APIView):
         ]
 
         return Response(data)
+
+
+class PortfolioTopGrowthAPIView(APIView):
+
+    def get(self, request, pk):
+        try:
+            portfolio = Portfolio.objects.get(pk=pk, owner=request.user)
+        except Portfolio.DoesNotExist:
+            return Response({"error": "Portfolio not found"}, status=404)
+
+        range_value = request.query_params.get("range", "1M")
+        stocks = Stock.objects.filter(portfolio=portfolio)
+
+        try:
+            data = fetch_top_growth_stocks(stocks, range_value=range_value, limit=8)
+            return Response(
+                {
+                    "range": (range_value or "1M").upper(),
+                    "count": len(data),
+                    "results": data,
+                }
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
 
 
 class MetalsHistoryAPIView(APIView):

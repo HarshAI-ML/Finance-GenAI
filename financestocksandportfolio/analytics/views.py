@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 
 from portfolio.models import Portfolio, Stock
 from .services.risk_clustering import RISK_FREE_RATE, compute_stock_risk_clusters
+from .services.btc_forecasting import get_btc_forecast_payload
 
 
 class PortfolioRiskClusterAPIView(APIView):
@@ -23,3 +24,14 @@ class PortfolioRiskClusterAPIView(APIView):
                 **result,
             }
         )
+
+
+class BtcForecastAPIView(APIView):
+    def get(self, request):
+        model_name = request.query_params.get("model", "linear")
+        forecast_days = request.query_params.get("days", 30)
+        try:
+            payload = get_btc_forecast_payload(model_name, forecast_days)
+            return Response(payload)
+        except Exception as exc:
+            return Response({"error": str(exc)}, status=400)

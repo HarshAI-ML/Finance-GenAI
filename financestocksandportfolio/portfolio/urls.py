@@ -10,6 +10,7 @@ from .views import (
     StockSearchAPIView,
     StockDetailAPIView,
     PortfolioTopDiscountAPIView,
+    PortfolioTopGrowthAPIView,
     MetalsHistoryAPIView,
 )
 
@@ -31,5 +32,8 @@ urlpatterns = [
     path('metals/history/', MetalsHistoryAPIView.as_view(), name='metals-history'),
     path(
     'portfolios/<int:pk>/top-discount/',PortfolioTopDiscountAPIView.as_view(),
+),
+    path(
+    'portfolios/<int:pk>/top-growth/', PortfolioTopGrowthAPIView.as_view(), name='portfolio-top-growth',
 ),
 ]

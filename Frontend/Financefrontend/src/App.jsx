@@ -7,6 +7,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import MetalsExplorer from "./pages/MetalsExplorer";
+import CryptoExplorer from "./pages/CryptoExplorer";
+import OtherFeatures from "./pages/OtherFeatures";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -16,6 +18,22 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/metals" element={<MetalsExplorer />} />
+        <Route
+          path="/features"
+          element={
+            <ProtectedRoute>
+              <OtherFeatures />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/crypto"
+          element={
+            <ProtectedRoute>
+              <CryptoExplorer />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route

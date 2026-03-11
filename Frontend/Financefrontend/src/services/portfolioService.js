@@ -23,3 +23,9 @@ export const deletePortfolio = (id) => {
 export const getPortfolioRiskClusters = (id) => {
   return API.get(`portfolios/${id}/risk-clusters/`);
 };
+
+export const getPortfolioTopGrowth = (id, range = "1M") => {
+  return API.get(`portfolios/${id}/top-growth/`, {
+    params: { range },
+  });
+};
