@@ -1,0 +1,32 @@
+name: Deploy Finance App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Pull latest code
+            cd /home/azureuser/Finance-GenAI
+            git pull origin main
+
+            # Restart Django backend
+            sudo systemctl restart financestocks
+
+            # Rebuild React frontend
+            cd /home/azureuser/Finance-GenAI/Frontend/Financefrontend
+            npm install
+            npm run build
+
+            # Restart Nginx
+            sudo systemctl restart nginx

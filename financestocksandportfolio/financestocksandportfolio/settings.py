@@ -25,9 +25,7 @@ SECRET_KEY = "django-insecure-9ifx86l23%eh%1$pg4hoc!^k3%e-vw^4yf58n*rz0j81cqn&g&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 CORS_ALLOW_ALL_ORIGINS = True
-ALLOWED_HOSTS = []
-
-
+ALLOWED_HOSTS = ['20.194.14.144', 'onepercent365-api.duckdns.org', 'localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
