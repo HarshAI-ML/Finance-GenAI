@@ -1,7 +1,4 @@
-from datetime import timedelta
-
 import yfinance as yf
-from django.utils import timezone
 
 
 def fetch_stock_data(ticker, range_value=None):
@@ -170,22 +167,8 @@ def refresh_stock_snapshot(stock):
     return stock
 
 
-def _is_stock_stale(stock, min_age_minutes):
-    if min_age_minutes is None:
-        return True
-
-    last_updated = stock.last_updated
-    if last_updated is None:
-        return True
-
-    age = timezone.now() - last_updated
-    return age >= timedelta(minutes=min_age_minutes)
-
-
-def refresh_portfolio_stocks(portfolio, min_age_minutes=15):
+def refresh_portfolio_stocks(portfolio):
     for stock in portfolio.stocks.all():
-        if not _is_stock_stale(stock, min_age_minutes):
-            continue
         try:
             refresh_stock_snapshot(stock)
         except Exception:

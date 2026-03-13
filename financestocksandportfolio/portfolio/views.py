@@ -78,16 +78,9 @@ class MeAPIView(APIView):
 class PortfolioListAPIView(APIView):
 
     def get(self, request):
-        refresh = (request.query_params.get("refresh") or "").strip().lower()
-        if refresh in {"1", "true", "yes"}:
-            try:
-                min_age = int(request.query_params.get("max_age_minutes", 15))
-            except (TypeError, ValueError):
-                min_age = 15
-
-            portfolios = Portfolio.objects.filter(owner=request.user)
-            for portfolio in portfolios:
-                refresh_portfolio_stocks(portfolio, min_age_minutes=min_age)
+        portfolios = Portfolio.objects.filter(owner=request.user)
+        for portfolio in portfolios:
+            refresh_portfolio_stocks(portfolio)
 
         portfolios = Portfolio.objects.filter(owner=request.user)
         serializer = PortfolioSerializer(portfolios, many=True)
@@ -109,11 +102,7 @@ class PortfolioDetailAPIView(APIView):
         except Portfolio.DoesNotExist:
             return Response({"error": "Portfolio not found"}, status=404)
 
-        try:
-            min_age = int(request.query_params.get("max_age_minutes", 15))
-        except (TypeError, ValueError):
-            min_age = 15
-        refresh_portfolio_stocks(portfolio, min_age_minutes=min_age)
+        refresh_portfolio_stocks(portfolio)
         portfolio.refresh_from_db()
         serializer = PortfolioSerializer(portfolio)
         return Response(serializer.data)
